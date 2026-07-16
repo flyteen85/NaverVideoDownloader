@@ -71,6 +71,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
+  if (msg.type === 'NVD_CHECK_UPDATE') {
+    checkUpdate().then(async () => {
+      const { nvdUpdate } = await chrome.storage.local.get('nvdUpdate');
+      sendResponse(nvdUpdate || null);
+    });
+    return true;
+  }
+
   if (msg.type === 'NVD_GET') {
     chrome.storage.session.get(keyOf(msg.tabId)).then((o) => {
       sendResponse({ videos: o[keyOf(msg.tabId)] || [] });

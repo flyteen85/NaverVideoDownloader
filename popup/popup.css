@@ -108,7 +108,22 @@ body {
   font-size: 14px;
   font-weight: 700;
   letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.ver-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 1.5px 6px;
+  border-radius: 999px;
+  color: rgba(238, 242, 247, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.ver-badge:empty { display: none; }
 
 .header-text p {
   font-size: 11px;

@@ -11,6 +11,11 @@ const $tpl = document.getElementById('card-tpl');
 init();
 
 async function init() {
+  // 현재 실행 중인 확장 버전 표시
+  try {
+    document.getElementById('ver-badge').textContent = 'v' + chrome.runtime.getManifest().version;
+  } catch (e) {}
+
   await syncActiveTab();
   await showUpdateBannerIfAny();
 
@@ -26,16 +31,21 @@ async function init() {
   });
 }
 
-// 백그라운드가 확인해 둔 최신 버전 정보로 업데이트 배너 노출
+// 패널 열 때 백그라운드에 즉시 확인을 요청해 업데이트 배너 노출 (타이밍 레이스 방지)
 async function showUpdateBannerIfAny() {
+  let info = null;
   try {
-    const { nvdUpdate } = await chrome.storage.local.get('nvdUpdate');
-    if (!nvdUpdate || !nvdUpdate.hasUpdate) return;
-    const banner = document.getElementById('update-banner');
-    document.getElementById('ub-ver').textContent = 'v' + nvdUpdate.latest;
-    banner.href = nvdUpdate.url;
-    banner.classList.remove('hidden');
+    info = await chrome.runtime.sendMessage({ type: 'NVD_CHECK_UPDATE' });
   } catch (e) {}
+  if (!info) {
+    // 라이브 확인 실패 시 이전에 저장된 값으로 폴백
+    try { info = (await chrome.storage.local.get('nvdUpdate')).nvdUpdate; } catch (e) {}
+  }
+  if (!info || !info.hasUpdate) return;
+  const banner = document.getElementById('update-banner');
+  document.getElementById('ub-ver').textContent = 'v' + info.latest;
+  banner.href = info.url;
+  banner.classList.remove('hidden');
 }
 
 async function syncActiveTab() {
