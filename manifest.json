@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "네이버 동영상 다운로더",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "네이버 블로그·카페·포스트의 동영상을 자동 감지하여 화질별로 바로 다운로드합니다.",
   "minimum_chrome_version": "114",
   "permissions": ["downloads", "storage", "alarms"],
