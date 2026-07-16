@@ -71,12 +71,22 @@ const ICON_OFF = {
   48: 'icons/icon48-gray.png', 128: 'icons/icon128-gray.png',
 };
 const TITLE_ON = '네이버 동영상 다운로더 (클릭하여 패널 열기)';
-const TITLE_OFF = '네이버 동영상 다운로더 — 네이버 페이지에서만 사용할 수 있어요';
+const TITLE_OFF = '네이버 동영상 다운로더 — 네이버 블로그·카페·포스트에서만 사용할 수 있어요';
 
-function isNaverUrl(url) {
+// 실제로 동작하는 곳만 화이트리스트로 허용한다(폐쇄적 허용).
+// 네이버 홈·메일·메모·지도·쇼핑 등에서는 스마트에디터 영상이 없으므로 소등한다.
+// manifest의 host_permissions / content_scripts.matches 와 반드시 같은 목록을 유지할 것.
+const SUPPORTED_HOSTS = new Set([
+  'blog.naver.com', 'm.blog.naver.com',
+  'cafe.naver.com', 'm.cafe.naver.com',
+  'post.naver.com', 'm.post.naver.com',
+]);
+
+function isSupportedUrl(url) {
   try {
-    const h = new URL(url).hostname;
-    return h === 'naver.com' || h.endsWith('.naver.com');
+    const u = new URL(url);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return false;
+    return SUPPORTED_HOSTS.has(u.hostname); // 정확히 일치하는 호스트만
   } catch (e) {
     return false;
   }
@@ -90,7 +100,7 @@ async function refreshAction(tabId) {
   } catch (e) {
     return; // 탭이 이미 닫힌 경우 등
   }
-  const on = isNaverUrl(url);
+  const on = isSupportedUrl(url);
   try {
     await chrome.action.setIcon({ tabId, path: on ? ICON_ON : ICON_OFF });
     await chrome.action.setTitle({ tabId, title: on ? TITLE_ON : TITLE_OFF });

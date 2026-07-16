@@ -1,16 +1,23 @@
 {
   "manifest_version": 3,
   "name": "네이버 동영상 다운로더",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "네이버 블로그·카페·포스트의 동영상을 자동 감지하여 화질별로 바로 다운로드합니다.",
   "minimum_chrome_version": "114",
   "permissions": ["downloads", "storage", "alarms"],
-  "host_permissions": ["*://*.naver.com/*"],
+  "host_permissions": [
+    "*://blog.naver.com/*",
+    "*://m.blog.naver.com/*",
+    "*://cafe.naver.com/*",
+    "*://m.cafe.naver.com/*",
+    "*://post.naver.com/*",
+    "*://m.post.naver.com/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "네이버 동영상 다운로더 — 네이버 페이지에서만 사용할 수 있어요",
+    "default_title": "네이버 동영상 다운로더 — 네이버 블로그·카페·포스트에서만 사용할 수 있어요",
     "default_icon": {
       "16": "icons/icon16-gray.png",
       "24": "icons/icon24-gray.png",
@@ -27,20 +34,41 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.naver.com/*"],
+      "matches": [
+        "*://blog.naver.com/*",
+        "*://m.blog.naver.com/*",
+        "*://cafe.naver.com/*",
+        "*://m.cafe.naver.com/*",
+        "*://post.naver.com/*",
+        "*://m.post.naver.com/*"
+      ],
       "js": ["content/interceptor.js"],
       "run_at": "document_start",
       "all_frames": true,
       "world": "MAIN"
     },
     {
-      "matches": ["*://*.naver.com/*"],
+      "matches": [
+        "*://blog.naver.com/*",
+        "*://m.blog.naver.com/*",
+        "*://cafe.naver.com/*",
+        "*://m.cafe.naver.com/*",
+        "*://post.naver.com/*",
+        "*://m.post.naver.com/*"
+      ],
       "js": ["content/bridge.js"],
       "run_at": "document_start",
       "all_frames": true
     },
     {
-      "matches": ["*://*.naver.com/*"],
+      "matches": [
+        "*://blog.naver.com/*",
+        "*://m.blog.naver.com/*",
+        "*://cafe.naver.com/*",
+        "*://m.cafe.naver.com/*",
+        "*://post.naver.com/*",
+        "*://m.post.naver.com/*"
+      ],
       "js": ["content/panel.js"],
       "run_at": "document_idle",
       "all_frames": false
@@ -49,7 +77,14 @@
   "web_accessible_resources": [
     {
       "resources": ["popup/popup.html", "popup/popup.css", "popup/popup.js", "icons/*"],
-      "matches": ["*://*.naver.com/*"]
+      "matches": [
+        "*://blog.naver.com/*",
+        "*://m.blog.naver.com/*",
+        "*://cafe.naver.com/*",
+        "*://m.cafe.naver.com/*",
+        "*://post.naver.com/*",
+        "*://m.post.naver.com/*"
+      ]
     }
   ]
 }
