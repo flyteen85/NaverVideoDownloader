@@ -23,10 +23,11 @@
         backdrop-filter: blur(1.5px);
         -webkit-backdrop-filter: blur(1.5px);
         opacity: 0;
+        pointer-events: none;      /* 닫혀 있을 땐 페이지 클릭·스크롤을 막지 않음 */
         transition: opacity ${DURATION}ms ease;
         z-index: 2147483646;
       }
-      .scrim.show { opacity: 1; }
+      .scrim.show { opacity: 1; pointer-events: auto; }
       .frame {
         position: fixed; top: 0; right: 0;
         height: 100vh; height: 100dvh;
@@ -65,6 +66,7 @@
     if (!host) build();
     open = true;
     animating = true;
+    host.style.display = '';        // 이전에 닫으며 숨겼다면 복구
     // reflow 후 클래스 추가 → 트랜지션 발동
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -83,7 +85,11 @@
     scrim.classList.remove('show');
     frame.classList.remove('show');
     document.removeEventListener('keydown', onKey, true);
-    setTimeout(() => { animating = false; }, DURATION);
+    setTimeout(() => {
+      animating = false;
+      // 애니메이션이 끝나면 오버레이를 레이아웃에서 완전히 제거 (스크롤/클릭 차단 방지)
+      if (!open && host) host.style.display = 'none';
+    }, DURATION);
   }
 
   function toggle() {
