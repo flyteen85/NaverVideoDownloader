@@ -31,7 +31,15 @@ New-Item -ItemType Directory -Force (Join-Path $stage 'icons') | Out-Null
 Copy-Item (Join-Path $root 'icons\*.png') (Join-Path $stage 'icons')
 
 # 버전 읽어서 zip 이름 구성
-$version = (Get-Content (Join-Path $root 'manifest.json') -Raw | ConvertFrom-Json).version
+# NOTE: Windows PowerShell 5.1은 UTF-8 파일을 ANSI(CP949)로 읽어 한글을 깨뜨린다.
+#       그러면 ConvertFrom-Json이 실패하므로, UTF8로 명시해 읽고 정규식으로 버전만 뽑는다.
+#       (버전은 ASCII라 한글 손상 여부와 무관하게 안전하다.)
+$manifestText = Get-Content (Join-Path $root 'manifest.json') -Raw -Encoding UTF8
+if ($manifestText -match '"version"\s*:\s*"([^"]+)"') {
+  $version = $Matches[1]
+} else {
+  throw "manifest.json에서 version을 찾지 못했습니다."
+}
 $zip = Join-Path $out ("naver-video-downloader-v{0}.zip" -f $version)
 if (Test-Path $zip) { Remove-Item -Force $zip }
 

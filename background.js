@@ -12,8 +12,8 @@ const keyOf = (tabId) => 'videos_' + tabId;
 const REPO = 'flyteen85/NaverVideoDownloader';
 const UPDATE_ALARM = 'nvd-update-check';
 
-chrome.runtime.onInstalled.addListener(() => { ensureUpdateAlarm(); checkUpdate(); });
-chrome.runtime.onStartup.addListener(() => { ensureUpdateAlarm(); checkUpdate(); });
+chrome.runtime.onInstalled.addListener(() => { ensureUpdateAlarm(); checkUpdate(); refreshAllTabs(); });
+chrome.runtime.onStartup.addListener(() => { ensureUpdateAlarm(); checkUpdate(); refreshAllTabs(); });
 chrome.alarms.onAlarm.addListener((a) => { if (a.name === UPDATE_ALARM) checkUpdate(); });
 
 function ensureUpdateAlarm() {
@@ -54,6 +54,62 @@ function isNewer(a, b) {
   }
   return false;
 }
+
+// ────────────────────────────────────────────────────────────────
+// 아이콘 점등/소등
+//  네이버 도메인에서는 컬러 아이콘 + 클릭 가능,
+//  그 외 도메인에서는 흑백 아이콘 + 클릭 비활성(패널이 열리지 않음).
+//  ※ tabs 권한 없이 동작한다. *.naver.com host 권한 덕에 네이버 탭에서만
+//    tab.url 이 보이고, 다른 도메인은 URL 자체가 가려져 자연스럽게 소등된다.
+// ────────────────────────────────────────────────────────────────
+const ICON_ON = {
+  16: 'icons/icon16.png', 24: 'icons/icon24.png', 32: 'icons/icon32.png',
+  48: 'icons/icon48.png', 128: 'icons/icon128.png',
+};
+const ICON_OFF = {
+  16: 'icons/icon16-gray.png', 24: 'icons/icon24-gray.png', 32: 'icons/icon32-gray.png',
+  48: 'icons/icon48-gray.png', 128: 'icons/icon128-gray.png',
+};
+const TITLE_ON = '네이버 동영상 다운로더 (클릭하여 패널 열기)';
+const TITLE_OFF = '네이버 동영상 다운로더 — 네이버 페이지에서만 사용할 수 있어요';
+
+function isNaverUrl(url) {
+  try {
+    const h = new URL(url).hostname;
+    return h === 'naver.com' || h.endsWith('.naver.com');
+  } catch (e) {
+    return false;
+  }
+}
+
+async function refreshAction(tabId) {
+  let url = '';
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    url = tab.url || ''; // 권한 없는 도메인은 빈 값 → 소등
+  } catch (e) {
+    return; // 탭이 이미 닫힌 경우 등
+  }
+  const on = isNaverUrl(url);
+  try {
+    await chrome.action.setIcon({ tabId, path: on ? ICON_ON : ICON_OFF });
+    await chrome.action.setTitle({ tabId, title: on ? TITLE_ON : TITLE_OFF });
+    if (on) await chrome.action.enable(tabId);
+    else await chrome.action.disable(tabId);
+  } catch (e) {}
+}
+
+async function refreshAllTabs() {
+  try {
+    const tabs = await chrome.tabs.query({});
+    for (const t of tabs) if (t.id >= 0) refreshAction(t.id);
+  } catch (e) {}
+}
+
+chrome.tabs.onActivated.addListener(({ tabId }) => refreshAction(tabId));
+chrome.tabs.onUpdated.addListener((tabId, info) => {
+  if (info.status || info.url) refreshAction(tabId);
+});
 
 // 툴바 아이콘 클릭 → 해당 탭의 인페이지 드로어를 토글
 chrome.action.onClicked.addListener((tab) => {

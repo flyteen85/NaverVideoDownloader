@@ -1,17 +1,30 @@
-# 확장 아이콘 생성 스크립트 (16/24/32/48/128)
-# 크롬 권장 세트를 모두 생성한다. 실행: .\generate-icons.ps1
+# Extension icon generator
+#   color set : icon16/24/32/48/128.png        -> active (naver.com tabs)
+#   gray set  : icon16-gray/...-gray.png       -> inactive (other domains)
+#
+# NOTE: keep this file ASCII-only. Windows PowerShell 5.1 reads .ps1 as ANSI
+#       when there is no BOM, so non-ASCII comments corrupt the lines that
+#       follow them (this previously nulled out the gray color variables).
+#
+# Usage: .\generate-icons.ps1
 Add-Type -AssemblyName System.Drawing
 
-function New-Icon([int]$size, [string]$path) {
+function New-Icon {
+  param(
+    [int]$size,
+    [string]$path,
+    [System.Drawing.Color]$c1,
+    [System.Drawing.Color]$c2,
+    [int]$arrowAlpha = 255
+  )
   $bmp = New-Object System.Drawing.Bitmap($size, $size)
   $g = [System.Drawing.Graphics]::FromImage($bmp)
   $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
 
   $rect = New-Object System.Drawing.Rectangle(0, 0, $size, $size)
-  $c1 = [System.Drawing.Color]::FromArgb(255, 3, 199, 90)
-  $c2 = [System.Drawing.Color]::FromArgb(255, 0, 140, 200)
   $brush = New-Object System.Drawing.Drawing2D.LinearGradientBrush($rect, $c1, $c2, 45.0)
 
+  # rounded square background
   $r = [Math]::Max(2, [int]($size * 0.22))
   $d = 2 * $r
   $gp = New-Object System.Drawing.Drawing2D.GraphicsPath
@@ -22,21 +35,22 @@ function New-Icon([int]$size, [string]$path) {
   $gp.CloseFigure()
   $g.FillPath($brush, $gp)
 
-  $white = [System.Drawing.Brushes]::White
+  $fg = [System.Drawing.Color]::FromArgb($arrowAlpha, 255, 255, 255)
+  $white = New-Object System.Drawing.SolidBrush($fg)
   $s = [double]$size
 
-  # 화살표 몸통
+  # arrow shaft
   $g.FillRectangle($white, [single]($s * 0.42), [single]($s * 0.18), [single]($s * 0.16), [single]($s * 0.30))
-  # 화살표 머리
+  # arrow head
   $pts = @(
     (New-Object System.Drawing.PointF([single]($s * 0.26), [single]($s * 0.44))),
     (New-Object System.Drawing.PointF([single]($s * 0.74), [single]($s * 0.44))),
     (New-Object System.Drawing.PointF([single]($s * 0.50), [single]($s * 0.70)))
   )
   $g.FillPolygon($white, $pts)
-  # 받침선
+  # base line
   $penW = [Math]::Max(1.5, $s * 0.09)
-  $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::White, [single]$penW)
+  $pen = New-Object System.Drawing.Pen($fg, [single]$penW)
   $pen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
   $pen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
   $g.DrawLine($pen, [single]($s * 0.26), [single]($s * 0.83), [single]($s * 0.74), [single]($s * 0.83))
@@ -44,14 +58,24 @@ function New-Icon([int]$size, [string]$path) {
   $g.Dispose()
   $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
   $bmp.Dispose()
-  Write-Host ("  icon{0}.png" -f $size)
 }
 
-# $PSScriptRoot 사용 (한글 경로를 스크립트에 하드코딩하면 인코딩이 깨짐)
+# use $PSScriptRoot; hardcoding a Korean path here would get mangled
 $dir = Join-Path $PSScriptRoot 'icons'
 New-Item -ItemType Directory -Force $dir | Out-Null
 Write-Host "generating icons ->" $dir
+
+# active: naver green -> teal
+$on1 = [System.Drawing.Color]::FromArgb(255, 3, 199, 90)
+$on2 = [System.Drawing.Color]::FromArgb(255, 0, 140, 200)
+
+# inactive: mid gray -> dark gray, arrow slightly dimmed
+$off1 = [System.Drawing.Color]::FromArgb(255, 154, 160, 166)
+$off2 = [System.Drawing.Color]::FromArgb(255, 95, 99, 104)
+
 foreach ($sz in 16, 24, 32, 48, 128) {
-  New-Icon $sz (Join-Path $dir ("icon{0}.png" -f $sz))
+  New-Icon -size $sz -path (Join-Path $dir ("icon{0}.png" -f $sz)) -c1 $on1 -c2 $on2
+  New-Icon -size $sz -path (Join-Path $dir ("icon{0}-gray.png" -f $sz)) -c1 $off1 -c2 $off2 -arrowAlpha 225
+  Write-Host ("  icon{0}.png + icon{0}-gray.png" -f $sz)
 }
 Write-Host "done"

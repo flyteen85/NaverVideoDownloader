@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "네이버 동영상 다운로더",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "네이버 블로그·카페·포스트의 동영상을 자동 감지하여 화질별로 바로 다운로드합니다.",
   "minimum_chrome_version": "114",
   "permissions": ["downloads", "storage", "alarms"],
@@ -10,13 +10,13 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "네이버 동영상 다운로더 (클릭하여 패널 열기)",
+    "default_title": "네이버 동영상 다운로더 — 네이버 페이지에서만 사용할 수 있어요",
     "default_icon": {
-      "16": "icons/icon16.png",
-      "24": "icons/icon24.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
+      "16": "icons/icon16-gray.png",
+      "24": "icons/icon24-gray.png",
+      "32": "icons/icon32-gray.png",
+      "48": "icons/icon48-gray.png",
+      "128": "icons/icon128-gray.png"
     }
   },
   "icons": {
