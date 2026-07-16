@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>popup preview (개발용)</title>
+  <link rel="stylesheet" href="popup.css" />
+  <script>
+    // 개발용 chrome API mock — 실제 확장에서는 사용되지 않음
+    window.chrome = {
+      tabs: {
+        query: async () => [{ id: 1 }],
+        sendMessage: async () => ({}),
+      },
+      runtime: {
+        sendMessage: async (msg) => {
+          if (msg.type === 'NVD_GET') {
+            return {
+              videos: [
+                {
+                  videoId: 'a', title: '제주도 협재 해수욕장에서 찍은 노을 영상 — 진짜 예뻤던 순간',
+                  thumbnail: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="152"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="%23ff9a62"/><stop offset="1" stop-color="%235b3bd6"/></linearGradient></defs><rect width="256" height="152" fill="url(%23g)"/></svg>',
+                  duration: 58.816,
+                  qualities: [
+                    { label: '720p', height: 720, size: 44_500_000, sizeEstimated: false, url: '#' },
+                    { label: '480p', height: 480, size: 21_300_000, sizeEstimated: false, url: '#' },
+                    { label: '270p', height: 270, size: 8_100_000, sizeEstimated: false, url: '#' },
+                  ],
+                },
+                {
+                  videoId: 'b', title: '강아지 산책 브이로그',
+                  thumbnail: null,
+                  duration: 214,
+                  qualities: [
+                    { label: '1080p', height: 1080, size: 182_000_000, sizeEstimated: true, url: '#' },
+                    { label: '720p', height: 720, size: 95_000_000, sizeEstimated: true, url: '#' },
+                  ],
+                },
+              ],
+            };
+          }
+          if (msg.type === 'NVD_DOWNLOAD') { await new Promise(r => setTimeout(r, 700)); return { ok: true }; }
+          return {};
+        },
+      },
+    };
+  </script>
+</head>
+<body>
+  <div class="bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <header class="glass header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 3v10" /><path d="M7 9l5 5 5-5" /><path d="M4 19h16" />
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>네이버 동영상 다운로더</h1>
+      <p id="status-line">영상을 찾는 중…</p>
+    </div>
+    <button id="rescan" class="icon-btn" title="다시 검색">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12a9 9 0 1 1-2.64-6.36" /><path d="M21 3v6h-6" />
+      </svg>
+    </button>
+  </header>
+
+  <main id="list"></main>
+
+  <div id="empty" class="glass empty hidden">
+    <div class="empty-icon">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="5" width="20" height="14" rx="3" /><path d="M10 9.5l5 2.5-5 2.5z" fill="currentColor" stroke="none" />
+      </svg>
+    </div>
+    <h2>아직 발견된 영상이 없어요</h2>
+    <p>네이버 블로그·카페 글에 들어가면<br />자동으로 영상을 감지합니다.<br />감지되지 않으면 영상을 한 번 재생해 보세요.</p>
+  </div>
+
+  <footer>
+    <span id="footer-note">페이지 진입 시 자동 감지 · 새로고침 불필요</span>
+  </footer>
+
+  <div id="toast" class="toast"></div>
+
+  <template id="card-tpl">
+    <section class="glass card">
+      <div class="thumb-wrap">
+        <img class="thumb" alt="" />
+        <div class="thumb-fallback">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor"><path d="M8 5.5v13l11-6.5z" /></svg>
+        </div>
+        <span class="duration"></span>
+      </div>
+      <div class="card-body">
+        <h3 class="title"></h3>
+        <div class="quality-row"></div>
+        <div class="meta-row">
+          <span class="size"></span>
+          <button class="download-btn" title="다운로드">
+            <svg class="ic-down" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 4v11" /><path d="M7 10l5 5 5-5" /><path d="M5 20h14" />
+            </svg>
+            <svg class="ic-check hidden" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 12.5l5 5L20 7" />
+            </svg>
+            <span class="spinner hidden"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </template>
+
+  <script src="popup.js"></script>
+</body>
+</html>

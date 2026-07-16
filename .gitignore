@@ -1,0 +1,11 @@
+# 배포 산출물 (릴리스로 첨부하므로 저장소엔 커밋하지 않음)
+/dist/
+
+# 개발 환경 파일
+/.claude/
+*.local.json
+
+# OS/편집기
+Thumbs.db
+Desktop.ini
+.DS_Store
