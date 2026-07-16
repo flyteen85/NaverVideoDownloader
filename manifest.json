@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "네이버 동영상 다운로더",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "네이버 블로그·카페·포스트의 동영상을 자동 감지하여 화질별로 바로 다운로드합니다.",
   "minimum_chrome_version": "114",
   "permissions": ["downloads", "storage", "alarms"],
@@ -13,12 +13,15 @@
     "default_title": "네이버 동영상 다운로더 (클릭하여 패널 열기)",
     "default_icon": {
       "16": "icons/icon16.png",
+      "24": "icons/icon24.png",
+      "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
   "icons": {
     "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
